@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Hue API:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Hue_API_jar</output-path>
+    <root id="archive" name="Hue API.jar">
+      <element id="module-output" name="Hue API" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/google/code/gson/gson/2.7/gson-2.7.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
