@@ -116,7 +116,7 @@ public class HueBridge {
                                 accessGranted = true;
                             }
                         } else {
-                            logger.log(Level.WARNING, "Link button not pressed!");
+                            // Button not pressed
                         }
                     }
                 } else {

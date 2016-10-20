@@ -2,8 +2,8 @@ package com.kyleaheron;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import javafx.scene.paint.Color;
 
-import java.awt.*;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -140,17 +140,17 @@ public class HueLight {
         });
     }
 
-    private float[] RGBtoXY(float r, float g, float b) {
-        float[] color = new float[2];
-        float redRatio = (r / 255f);
-        float greenRatio = (g / 255f);
-        float blueRatio = (b / 255f);
-        float red = (float) ((redRatio > 0.04045f) ? Math.pow((redRatio + 0.055f) / (1.0f + 0.055f), 2.4f) : (redRatio / 12.92f));
-        float green = (float) ((greenRatio > 0.04045f) ? Math.pow((greenRatio + 0.055f) / (1.0f + 0.055f), 2.4f) : (greenRatio / 12.92f));
-        float blue = (float) ((blueRatio > 0.04045f) ? Math.pow((blueRatio + 0.055f) / (1.0f + 0.055f), 2.4f) : (blueRatio / 12.92f));
-        float x = (red * 0.664511f + green * 0.154324f + blue * 0.162028f);
-        float y = (red * 0.283881f + green * 0.668433f + blue * 0.047685f);
-        float z = (red * 0.000088f + green * 0.072310f + blue * 0.986039f);
+    private double[] RGBtoXY(double r, double g, double b) {
+        double[] color = new double[2];
+        double redRatio = (r / 255f);
+        double greenRatio = (g / 255f);
+        double blueRatio = (b / 255f);
+        double red = ((redRatio > 0.04045f) ? Math.pow((redRatio + 0.055f) / (1.0f + 0.055f), 2.4f) : (redRatio / 12.92f));
+        double green = ((greenRatio > 0.04045f) ? Math.pow((greenRatio + 0.055f) / (1.0f + 0.055f), 2.4f) : (greenRatio / 12.92f));
+        double blue = ((blueRatio > 0.04045f) ? Math.pow((blueRatio + 0.055f) / (1.0f + 0.055f), 2.4f) : (blueRatio / 12.92f));
+        double x = (red * 0.664511f + green * 0.154324f + blue * 0.162028f);
+        double y = (red * 0.283881f + green * 0.668433f + blue * 0.047685f);
+        double z = (red * 0.000088f + green * 0.072310f + blue * 0.986039f);
         color[0] = x / (x + y + z);
         color[1] = y / (x + y + z);
         return color;
@@ -174,7 +174,7 @@ public class HueLight {
 
     public HueLight setColor(Color c) {
         color = c;
-        float[] color = RGBtoXY(c.getRed(), c.getGreen(), c.getBlue());
+        double[] color = RGBtoXY(c.getRed(), c.getGreen(), c.getBlue());
         JsonArray array = new JsonArray();
         array.add(color[0]);
         array.add(color[1]);
