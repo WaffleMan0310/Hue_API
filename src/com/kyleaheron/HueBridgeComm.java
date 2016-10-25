@@ -102,4 +102,8 @@ class HueBridgeComm
     static List<JsonObject> request(requestMethod rm, String fullPath, JsonObject json) {
         return request(rm, fullPath, json.toString());
     }
+
+    static List<JsonObject> request(requestMethod rm, String fullPath) {
+        return request(rm, fullPath, "");
+    }
 }

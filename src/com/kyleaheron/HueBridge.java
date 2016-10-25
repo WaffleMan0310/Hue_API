@@ -33,35 +33,27 @@ public class HueBridge {
         this.ipAddress = ipAddress;
         this.uniqueDeviceId = uniqueDeviceId;
         usernameJsonFile = new File("username.json");
-        if (!usernameJsonFile.exists()) {
-            try {
+        try {
+            if (!usernameJsonFile.exists()) {
                 logger.log(Level.INFO, "'username.json' does not exist! Creating...");
                 usernameJsonFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            JsonObject usernameJson = new JsonObject();
-            try {
+            } else {
                 logger.log(Level.INFO, "'username.json' found! Loading username for bridge...");
                 FileReader reader = new FileReader(usernameJsonFile);
                 BufferedReader readBuffer = new BufferedReader(reader);
                 StringBuilder builder = new StringBuilder();
                 JsonParser parser = new JsonParser();
                 String line;
+                JsonObject usernameJson;
                 while ((line = readBuffer.readLine()) != null) {
                     builder.append(line).append("\n");
                 }
                 reader.close();
                 readBuffer.close();
                 usernameJson = parser.parse(builder.toString()).getAsJsonObject();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
                 if (usernameJson.get("id").getAsString().equals(getUniqueDeviceId())) {
                     this.isAuthenticated = true;
                     this.username = usernameJson.get("username").getAsString();
-                    getConfigurationData();
                     completeInitialSync();
                     if (isAuthenticated && initialSyncComplete) {
                         logger.log(Level.INFO, String.format("Successfully connected to bridge: %s", getUniqueDeviceId()));
@@ -70,6 +62,8 @@ public class HueBridge {
                     logger.log(Level.WARNING, "Username not found for bridge, call 'authenticate' to create one.");
                 }
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -111,7 +105,6 @@ public class HueBridge {
                                 e.printStackTrace();
                             } finally {
                                 logger.log(Level.INFO, String.format("Successfully authenticated with bridge: %s!", getUniqueDeviceId()));
-                                getConfigurationData();
                                 completeInitialSync();
                                 accessGranted = true;
                             }
@@ -133,9 +126,19 @@ public class HueBridge {
 
     private void completeInitialSync() {
         if (isAuthenticated && !initialSyncComplete) {
-            List<JsonObject> response = HueBridgeComm.request(HueBridgeComm.requestMethod.GET, formatPath(getIpAddress(), getUsername(), "lights"), "");
-            if (response.size() > 0 ) {
-                for (Entry<String, JsonElement> property : response.get(0).entrySet()) {
+            List<JsonObject> configResponse = HueBridgeComm.request(HueBridgeComm.requestMethod.GET, formatPath(getIpAddress(), getUsername(), "config"));
+            if (configResponse.size() > 0) {
+                JsonObject configuration = configResponse.get(0);
+                this.name = configuration.get("name").getAsString();
+                this.macAddress = configuration.get("mac").getAsString();
+                this.netmask = configuration.get("netmask").getAsString();
+                this.dhcp = configuration.get("dhcp").getAsBoolean();
+            } else {
+                // No response
+            }
+            List<JsonObject> lightResponse = HueBridgeComm.request(HueBridgeComm.requestMethod.GET, formatPath(getIpAddress(), getUsername(), "lights"));
+            if (lightResponse.size() > 0 ) {
+                for (Entry<String, JsonElement> property : lightResponse.get(0).entrySet()) {
                     HueLight light = new HueLight(this, Integer.parseInt(property.getKey()));
                     JsonObject stateObject = property.getValue().getAsJsonObject().get("state").getAsJsonObject();
                     light.initializeStateVariables(
@@ -165,7 +168,7 @@ public class HueBridge {
     }
 
     public boolean searchForLights() {
-        List<JsonObject> response = HueBridgeComm.request(HueBridgeComm.requestMethod.POST, formatPath(getIpAddress(), getUsername(), "lights"), "");
+        List<JsonObject> response = HueBridgeComm.request(HueBridgeComm.requestMethod.POST, formatPath(getIpAddress(), getUsername(), "lights"));
         try {
             if (response.size() > 0) {
                 logger.log(Level.INFO, "Searching for new lights...");
@@ -178,21 +181,6 @@ public class HueBridge {
             e.printStackTrace();
         }
         return false;
-    }
-
-    private void getConfigurationData() {
-        List<JsonObject> response = HueBridgeComm.request(HueBridgeComm.requestMethod.GET, formatPath(getIpAddress(), getUsername(), "config"), "");
-        // Fix this
-        if (response.size() > 0) {
-            JsonObject configuration = response.get(0);
-            this.name = configuration.get("name").getAsString();
-            this.macAddress = configuration.get("mac").getAsString();
-            this.netmask = configuration.get("netmask").getAsString();
-            this.dhcp = configuration.get("dhcp").getAsBoolean();
-        } else {
-            // No response
-        }
-
     }
 
     static String formatPath(String ipAddr, String username, String path) {
