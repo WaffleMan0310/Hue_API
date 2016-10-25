@@ -199,6 +199,16 @@ public class HueBridge {
         return String.format("http://%s/api/%s/%s", ipAddr, username, path);
     }
 
+    public void setName(String name) {
+        JsonObject nameToSend = new JsonObject();
+        nameToSend.addProperty("name", name);
+        List<JsonObject> response = HueBridgeComm.request(
+                HueBridgeComm.requestMethod.PUT,
+                formatPath(getIpAddress(), getUsername(), "config"),
+                nameToSend);
+        if (response.size() > 0 && response.get(0).getAsJsonObject().has("success")) this.name = name;
+    }
+
     public List<HueLight> getLights() {
         return connectedLights;
     }

@@ -11,6 +11,15 @@ public class HueLight {
 
     static Logger logger = Logger.getLogger(HueLight.class.getName());
 
+    public static final int MIN_BRIGHTNESS = 1;
+    public static final int MAX_BRIGHTNESS = 254;
+
+    public static final int MIN_HUE = 0;
+    public static final int MAX_HUE = 65535;
+
+    public static final int MIN_SATURATION = 0;
+    public static final int MAX_SATURATION = 254;
+
     enum HueEffect {
         NONE, COLORLOOP
     }
@@ -156,19 +165,24 @@ public class HueLight {
         return color;
     }
 
+    public void setName(String name) {
+        JsonObject nameToSend = new JsonObject();
+        nameToSend.addProperty("name", name);
+        List<JsonObject> response = HueBridgeComm.request(
+                HueBridgeComm.requestMethod.PUT,
+                HueBridge.formatPath(parentBridge.getIpAddress(), parentBridge.getUsername(), "lights/" + getId()),
+                nameToSend
+        );
+        if (response.size() > 0 && response.get(0).getAsJsonObject().has("success")) this.name = name;
+    }
+
     public HueLight setOn(boolean state) {
-        if (state != isOn()) {
-            outputBuffer.addProperty("on", state);
-        }
+        if (state != isOn()) outputBuffer.addProperty("on", state);
         return this;
     }
 
     public HueLight setHue(int hue) {
-        if (hue >= 0 && hue < 65536 && hue != getHue()) {
-            outputBuffer.addProperty("hue", hue);
-        } else {
-            // Value out of bounds.
-        }
+        if (hue >= MIN_HUE && hue <= MAX_HUE) outputBuffer.addProperty("hue", hue);
         return this;
     }
 
@@ -183,20 +197,12 @@ public class HueLight {
     }
 
     public HueLight setSaturation(int saturation) {
-        if (saturation >= 0 && saturation < 255 && saturation != getSaturation()) {
-            outputBuffer.addProperty("sat", saturation);
-        } else {
-            // Value out of bounds
-        }
+        if (saturation >= MIN_SATURATION && saturation <= MAX_SATURATION) outputBuffer.addProperty("sat", saturation);
         return this;
     }
 
     public HueLight setBrightness(int brightness) {
-        if (brightness >= 0 && brightness < 255 && brightness != getBrightness()) {
-            outputBuffer.addProperty("bri", brightness);
-        } else {
-            // Value is out of bounds
-        }
+        if (brightness >= MIN_BRIGHTNESS && brightness <= MAX_BRIGHTNESS) outputBuffer.addProperty("bri", brightness);
         return this;
     }
 
