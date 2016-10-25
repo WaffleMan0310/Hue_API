@@ -182,7 +182,7 @@ public class HueLight {
     }
 
     public HueLight setHue(int hue) {
-        if (hue >= MIN_HUE && hue <= MAX_HUE) outputBuffer.addProperty("hue", hue);
+        if (hue >= MIN_HUE && hue <= MAX_HUE && hue != getHue()) outputBuffer.addProperty("hue", hue);
         return this;
     }
 
@@ -197,12 +197,12 @@ public class HueLight {
     }
 
     public HueLight setSaturation(int saturation) {
-        if (saturation >= MIN_SATURATION && saturation <= MAX_SATURATION) outputBuffer.addProperty("sat", saturation);
+        if (saturation >= MIN_SATURATION && saturation <= MAX_SATURATION && saturation != getSaturation()) outputBuffer.addProperty("sat", saturation);
         return this;
     }
 
     public HueLight setBrightness(int brightness) {
-        if (brightness >= MIN_BRIGHTNESS && brightness <= MAX_BRIGHTNESS) outputBuffer.addProperty("bri", brightness);
+        if (brightness >= MIN_BRIGHTNESS && brightness <= MAX_BRIGHTNESS && brightness != getBrightness()) outputBuffer.addProperty("bri", brightness);
         return this;
     }
 
