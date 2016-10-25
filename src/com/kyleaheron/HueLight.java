@@ -11,6 +11,8 @@ public class HueLight {
 
     static Logger logger = Logger.getLogger(HueLight.class.getName());
 
+    private static final int MAX_COMMAND_GAP = 100;
+
     public static final int MIN_BRIGHTNESS = 1;
     public static final int MAX_BRIGHTNESS = 254;
 
@@ -47,6 +49,8 @@ public class HueLight {
     private HueEffect effect;
     private HueAlert alertEffect;
 
+
+    private long lastBuffer;
     private JsonObject outputBuffer = new JsonObject();
 
     HueLight(HueBridge parentBridge, int id) {
@@ -63,17 +67,19 @@ public class HueLight {
                                 parentBridge.getIpAddress(),
                                 parentBridge.getUsername(),
                                 String.format("lights/%d/state", getId())),
-                        outputBuffer);
+                                outputBuffer);
                 if (response.size() > 0) {
                     updateStateVariables(response);
                     outputBuffer = new JsonObject();
                 } else {
                     // No response was given
                 }
-                Thread.sleep(100); // Recommended distance between commands
+                System.out.println(System.currentTimeMillis());
+                if ((lastBuffer - System.nanoTime()) / 1000000 < MAX_COMMAND_GAP) Thread.sleep(MAX_COMMAND_GAP - ((lastBuffer - System.nanoTime()) / 1000000));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            lastBuffer = System.nanoTime();
         }
     }
 
