@@ -61,6 +61,12 @@ public class HueLight {
     public void show() {
         if (outputBuffer.size() > 0) {
             try {
+                double changeInMs = ((double)(System.nanoTime() - lastBuffer)) / 1000000;
+                System.out.println(changeInMs);
+                if (changeInMs < MAX_COMMAND_GAP) {
+                    int sleepDuration = (int)(MAX_COMMAND_GAP - ((double)(System.nanoTime() - lastBuffer) / 1000000));
+                    if (sleepDuration > 0) Thread.sleep(sleepDuration);
+                }
                 List<JsonObject> response = HueBridgeComm.request(
                         HueBridgeComm.requestMethod.PUT,
                         HueBridge.formatPath(
@@ -74,8 +80,6 @@ public class HueLight {
                 } else {
                     // No response was given
                 }
-                System.out.println(System.currentTimeMillis());
-                if ((lastBuffer - System.nanoTime()) / 1000000 < MAX_COMMAND_GAP) Thread.sleep(MAX_COMMAND_GAP - ((lastBuffer - System.nanoTime()) / 1000000));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

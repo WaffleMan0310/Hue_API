@@ -2,7 +2,7 @@ package com.kyleaheron;
 
 import com.google.gson.JsonObject;
 
-public class HueException extends Exception {
+class HueException extends Exception {
 
     private int errorType;
     private String errorAddress;
