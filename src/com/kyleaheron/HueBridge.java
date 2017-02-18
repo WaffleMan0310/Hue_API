@@ -39,22 +39,29 @@ public class HueBridge {
                 usernameJsonFile.createNewFile();
             } else {
                 logger.log(Level.INFO, "'username.json' found! Loading username for bridge...");
+
                 FileReader reader = new FileReader(usernameJsonFile);
                 BufferedReader readBuffer = new BufferedReader(reader);
                 StringBuilder builder = new StringBuilder();
                 JsonParser parser = new JsonParser();
                 String line;
                 JsonObject usernameJson;
+
                 while ((line = readBuffer.readLine()) != null) {
                     builder.append(line).append("\n");
                 }
+
                 reader.close();
                 readBuffer.close();
+
                 usernameJson = parser.parse(builder.toString()).getAsJsonObject();
+
                 if (usernameJson.get("id").getAsString().equals(getUniqueDeviceId())) {
                     this.isAuthenticated = true;
                     this.username = usernameJson.get("username").getAsString();
+
                     completeInitialSync();
+
                     if (isAuthenticated && initialSyncComplete) {
                         logger.log(Level.INFO, String.format("Successfully connected to bridge: %s", getUniqueDeviceId()));
                     }
@@ -74,18 +81,23 @@ public class HueBridge {
     public void authenticate() {
         if (!isAuthenticated) {
             logger.log(Level.INFO, "Bridge not authenticated! Authenticating...");
+
             boolean accessGranted = false;
             List<JsonObject> response;
             JsonObject output = new JsonObject();
+
             output.addProperty("devicetype", getClass().getName());
-            if (username != null)
-            {
+
+            if (username != null) {
                 output.addProperty("username", username);
             }
+
             int waitInSeconds = 30;
             long startTime = System.currentTimeMillis();
+
             do {
                 response = HueBridgeComm.request(HueBridgeComm.requestMethod.POST, String.format("http://%s/api", getIpAddress()), output);
+
                 if (response.size() > 0) {
                     for (JsonObject responseObj : response) {
                         if (responseObj.has("success")) {

@@ -62,7 +62,6 @@ public class HueLight {
         if (outputBuffer.size() > 0) {
             try {
                 double changeInMs = ((double)(System.nanoTime() - lastBuffer)) / 1000000;
-                System.out.println(changeInMs);
                 if (changeInMs < MAX_COMMAND_GAP) {
                     int sleepDuration = (int)(MAX_COMMAND_GAP - ((double)(System.nanoTime() - lastBuffer) / 1000000));
                     if (sleepDuration > 0) Thread.sleep(sleepDuration);

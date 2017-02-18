@@ -27,16 +27,21 @@ class HueBridgeComm
         List<HueBridge> bridgeList = new ArrayList<>();
         JsonParser parser = new JsonParser();
         HttpURLConnection httpURLConnection;
+
         try {
             URL bridgeNUPnP = new URL(hueBridgeNUPnP);
             httpURLConnection = (HttpURLConnection) bridgeNUPnP.openConnection();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream(), requestCharset));
             StringBuilder builder = new StringBuilder();
             String line;
+
             while ((line = reader.readLine()) != null) {
                 builder.append(line).append("\n");
             }
+
             reader.close();
+
             if (!builder.toString().equals("[]")) {
                 JsonArray bridges = (JsonArray) parser.parse(builder.toString());
                 for (JsonElement element : bridges) {
@@ -59,25 +64,33 @@ class HueBridgeComm
         JsonParser parser = new JsonParser();
         HttpURLConnection connection;
         URL reqUrl;
+
         try {
 
             reqUrl = new URL(fullPath);
             connection = (HttpURLConnection) reqUrl.openConnection();
+
             connection.setRequestMethod(rm.name());
+
             if (!json.equals("")) {
                 connection.setRequestProperty("Content-Length", String.valueOf(json.getBytes().length));
                 connection.setDoOutput(true);
                 connection.getOutputStream().write(json.getBytes(requestCharset));
             }
+
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), requestCharset));
             StringBuilder builder = new StringBuilder();
             String line;
+
             while ((line = reader.readLine()) != null) {
                 builder.append(line).append("\n");
             }
+
             reader.close();
             connection.disconnect();
+
             String jsonString = builder.toString().trim();
+
             if (jsonString.trim().startsWith("{")) {
                 response.add((JsonObject) parser.parse(jsonString));
             } else {
@@ -85,6 +98,7 @@ class HueBridgeComm
                     response.add(element.getAsJsonObject());
                 }
             }
+
             for (JsonObject object : response) {
                 if (object.has("error")) {
                     throw new HueException(object);
